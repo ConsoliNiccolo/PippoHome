@@ -1,0 +1,271 @@
+---
+swagger: "2.0"
+info:
+  description: "The API for the PippHo IoT project"
+  version: "1.0.0"
+  title: "pipp-ho"
+host: "virtserver.swaggerhub.com"
+basePath: "/Fanatic17/PippHo/1.0.0"
+schemes:
+- "https"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+paths:
+  /groups:
+    get:
+      tags:
+      - "Group"
+      description: "returns all registered groups"
+      operationId: "getGroups"
+      parameters: []
+      responses:
+        200:
+          description: "All groups"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Group"
+      x-swagger-router-controller: "Group"
+    post:
+      tags:
+      - "Group"
+      description: "create a new group"
+      operationId: "createGroup"
+      parameters:
+      - in: "body"
+        name: "name"
+        required: true
+        schema:
+          $ref: "#/definitions/GroupCreationInfo"
+      responses:
+        200:
+          description: "successfully created group"
+      x-swagger-router-controller: "Group"
+  /devices:
+    get:
+      tags:
+      - "Device"
+      description: "returns all registered devices"
+      operationId: "getDevices"
+      parameters: []
+      responses:
+        200:
+          description: "All the devices"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Device"
+      x-swagger-router-controller: "Device"
+    post:
+      tags:
+      - "Device"
+      operationId: "registerDevice"
+      parameters:
+      - in: "body"
+        name: "device"
+        required: false
+        schema:
+          $ref: "#/definitions/DeviceRegistrationInfo"
+      responses:
+        200:
+          description: "successfully registered device"
+      x-swagger-router-controller: "Device"
+    put:
+      tags:
+      - "Device"
+      summary: "Update an existing device"
+      description: "Update an existing device"
+      operationId: "updateDevice"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Device object that needs to be updated"
+        required: true
+        schema:
+          $ref: "#/definitions/Device"
+      responses:
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Device not found"
+        405:
+          description: "Validation exception"
+      x-swagger-router-controller: "Device"
+  /command/{deviceId}/{value}:
+    get:
+      tags:
+      - "Command"
+      description: "command"
+      operationId: "getComnmands"
+      parameters:
+      - name: "deviceId"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "value"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "response"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+      x-swagger-router-controller: "Command"
+definitions:
+  Group:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      id:
+        type: "number"
+    description: "a group of devices"
+    example:
+      name: "name"
+      id: 0.80082819046101150206595775671303272247314453125
+  Device:
+    type: "object"
+    properties:
+      id:
+        type: "number"
+      name:
+        type: "string"
+      group:
+        type: "number"
+      configuration:
+        $ref: "#/definitions/Configuration"
+    description: "a device"
+    example:
+      configuration:
+        availableInterfaces:
+        - name: "name"
+          id: 1.46581298050294517310021547018550336360931396484375
+        - name: "name"
+          id: 1.46581298050294517310021547018550336360931396484375
+        connectedInterfaces:
+        - name: "name"
+          pins:
+          - name: "name"
+            id: 1.46581298050294517310021547018550336360931396484375
+          - name: "name"
+            id: 1.46581298050294517310021547018550336360931396484375
+          type: "type"
+        - name: "name"
+          pins:
+          - name: "name"
+            id: 1.46581298050294517310021547018550336360931396484375
+          - name: "name"
+            id: 1.46581298050294517310021547018550336360931396484375
+          type: "type"
+      name: "name"
+      id: 0.80082819046101150206595775671303272247314453125
+      group: 6.02745618307040320615897144307382404804229736328125
+  DeviceRegistrationInfo:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      group:
+        type: "string"
+    description: "device registration info. When a device is registered it gets a\
+      \ standard pinout configuration that can be modified later"
+    example:
+      name: "name"
+      group: "group"
+  GroupCreationInfo:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+    description: "group creation info."
+    example:
+      name: "name"
+  PhysicalInterface:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      type:
+        type: "string"
+      pins:
+        type: "array"
+        items:
+          $ref: "#/definitions/Pin"
+    description: "a sensor or actuator"
+    example:
+      name: "name"
+      pins:
+      - name: "name"
+        id: 1.46581298050294517310021547018550336360931396484375
+      - name: "name"
+        id: 1.46581298050294517310021547018550336360931396484375
+      type: "type"
+  Pin:
+    type: "object"
+    properties:
+      id:
+        type: "number"
+      name:
+        type: "string"
+    description: "a pin"
+    example:
+      name: "name"
+      id: 1.46581298050294517310021547018550336360931396484375
+  Configuration:
+    type: "object"
+    properties:
+      connectedInterfaces:
+        type: "array"
+        items:
+          $ref: "#/definitions/PhysicalInterface"
+      availableInterfaces:
+        type: "array"
+        items:
+          $ref: "#/definitions/Pin"
+    description: "device configuration"
+    example:
+      availableInterfaces:
+      - name: "name"
+        id: 1.46581298050294517310021547018550336360931396484375
+      - name: "name"
+        id: 1.46581298050294517310021547018550336360931396484375
+      connectedInterfaces:
+      - name: "name"
+        pins:
+        - name: "name"
+          id: 1.46581298050294517310021547018550336360931396484375
+        - name: "name"
+          id: 1.46581298050294517310021547018550336360931396484375
+        type: "type"
+      - name: "name"
+        pins:
+        - name: "name"
+          id: 1.46581298050294517310021547018550336360931396484375
+        - name: "name"
+          id: 1.46581298050294517310021547018550336360931396484375
+        type: "type"
+  Command:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+    description: "a command"
+  ApiResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      message:
+        type: "string"
+        example: "everything is ok"
+    example:
+      code: 0
+      message: "everything is ok"
