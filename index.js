@@ -8,7 +8,7 @@ var fs = require('fs'),
 var app = require('connect')();
 var swaggerTools = require('swagger-tools');
 var jsyaml = require('js-yaml');
-var moscaServer = require('./broker');
+var moscaServer = require('./mosca-broker/broker');
 var serverPort = 8080;
 
 // swaggerRouter configuration
@@ -68,5 +68,5 @@ mongoose.connect("mongodb://localhost:27017/PippoHomeOfficial");
 
 // fired when a raspberry is publishing data.
 moscaServer.server.on('published', function (packet, client) {
-  
+  console.log("Someone is doing something..",packet,packet.payload.toString());
 });

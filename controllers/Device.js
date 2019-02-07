@@ -14,6 +14,7 @@ module.exports.getDevices = function getDevices (req, res, next) {
 };
 
 module.exports.registerDevice = function registerDevice (req, res, next) {
+  //req.swagger.params['device'].value;
   var device = req.swagger.params['device'].value;
   Device.registerDevice(device)
     .then(function (response) {

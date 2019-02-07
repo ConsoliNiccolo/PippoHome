@@ -1,88 +1,39 @@
 'use strict';
+var deviceSchema = require('../mongo/mongo-schemas/DeviceSchema');
+var mongoose = require('mongoose');
+var Device = mongoose.model("Device", deviceSchema.Device);
 
+
+let standardConfiguration = {
+  connectedInterfaces: [{
+    name: "Sensor001",
+    type: "001",
+    pins: [{
+      id: 0,
+      name: 'GPIO3'
+    },
+    {
+      id: 1,
+      name: 'GPIO4'
+    }
+    ]
+  }],
+  availableInterfaces: [{
+    id: 2,
+    name: 'GPIO5'
+  }]
+};
 
 /**
  * returns all registered devices
  *
  * returns List
  **/
-exports.getDevices = function() {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ {
-  "configuration" : {
-    "availableInterfaces" : [ {
-      "name" : "name",
-      "id" : 1.46581298050294517310021547018550336360931396484375
-    }, {
-      "name" : "name",
-      "id" : 1.46581298050294517310021547018550336360931396484375
-    } ],
-    "connectedInterfaces" : [ {
-      "name" : "name",
-      "pins" : [ {
-        "name" : "name",
-        "id" : 1.46581298050294517310021547018550336360931396484375
-      }, {
-        "name" : "name",
-        "id" : 1.46581298050294517310021547018550336360931396484375
-      } ],
-      "type" : "type"
-    }, {
-      "name" : "name",
-      "pins" : [ {
-        "name" : "name",
-        "id" : 1.46581298050294517310021547018550336360931396484375
-      }, {
-        "name" : "name",
-        "id" : 1.46581298050294517310021547018550336360931396484375
-      } ],
-      "type" : "type"
-    } ]
-  },
-  "name" : "name",
-  "id" : 0.80082819046101150206595775671303272247314453125,
-  "group" : 6.02745618307040320615897144307382404804229736328125
-}, {
-  "configuration" : {
-    "availableInterfaces" : [ {
-      "name" : "name",
-      "id" : 1.46581298050294517310021547018550336360931396484375
-    }, {
-      "name" : "name",
-      "id" : 1.46581298050294517310021547018550336360931396484375
-    } ],
-    "connectedInterfaces" : [ {
-      "name" : "name",
-      "pins" : [ {
-        "name" : "name",
-        "id" : 1.46581298050294517310021547018550336360931396484375
-      }, {
-        "name" : "name",
-        "id" : 1.46581298050294517310021547018550336360931396484375
-      } ],
-      "type" : "type"
-    }, {
-      "name" : "name",
-      "pins" : [ {
-        "name" : "name",
-        "id" : 1.46581298050294517310021547018550336360931396484375
-      }, {
-        "name" : "name",
-        "id" : 1.46581298050294517310021547018550336360931396484375
-      } ],
-      "type" : "type"
-    } ]
-  },
-  "name" : "name",
-  "id" : 0.80082819046101150206595775671303272247314453125,
-  "group" : 6.02745618307040320615897144307382404804229736328125
-} ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
+
+
+exports.getDevices = function () {
+  return new Promise(function (resolve, reject) {
+    resolve(Device.find({}));
   });
 }
 
@@ -92,9 +43,45 @@ exports.getDevices = function() {
  * device DeviceRegistrationInfo  (optional)
  * no response value expected for this operation
  **/
-exports.registerDevice = function(device) {
-  return new Promise(function(resolve, reject) {
-    resolve();
+exports.registerDevice = function (device) {
+  return new Promise(function (resolve, reject) {
+    Device.find({
+      name: device.name
+    }).then(item => {
+      if (item.length == 0) {
+        getNumberedId().then(item => {
+          Device.create({
+            name: device['name'],
+            id: item,
+            group: 0,
+            configuration: standardConfiguration,
+          }).then(item => {
+            console.log("I created the given item", device);
+            resolve(item);
+          }).catch(err => {
+            reject(err);
+          });
+        });
+      } else {
+        reject({ err: "It already exists" });
+      }
+    }).catch(err => { console.log("Error"); reject(err); })
+  });
+}
+
+function getNumberedId() {
+  return new Promise(function (resolve, reject) {
+    Device.find({})
+      .then(
+        items => {
+          let number = 0;
+          items.forEach(el => { number += 1; });
+          resolve(number + 1);
+        })
+      .catch(err => {
+        console.log("Error on registration", err);
+        reject(err);
+      });
   });
 }
 
@@ -106,9 +93,11 @@ exports.registerDevice = function(device) {
  * body Device Device object that needs to be updated
  * no response value expected for this operation
  **/
-exports.updateDevice = function(body) {
-  return new Promise(function(resolve, reject) {
-    resolve();
+exports.updateDevice = function (body) {
+  return new Promise(function (resolve, reject) {
+    Device.findOneAndUpdate(body['name'],body, {new: true}).then( (item) => {
+      resolve(item);
+    }).catch( err => reject({Error: err}));
   });
 }
 
