@@ -11,6 +11,13 @@ var jsyaml = require('js-yaml');
 var moscaServer = require('./mosca-broker/broker');
 var serverPort = 8080;
 
+
+var measureSchema = require('./mongo/mongo-schemas/MeasureSchema');
+var Measure = mongoose.model("Measure", measureSchema.Measure);
+
+
+
+
 // swaggerRouter configuration
 var options = {
   swaggerUi: path.join(__dirname, '/swagger.json'),
@@ -41,6 +48,7 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
   http.createServer(app).listen(serverPort, function () {
     console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
     console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
+    console.log('Mosca is currently running on ',moscaServer.server.url)
   });
 
 });
@@ -66,7 +74,23 @@ mongoose.connect("mongodb://localhost:27017/PippoHomeOfficial");
 // ######################################################
 
 
-// fired when a raspberry is publishing data.
+//  Comunication with IoT Devices
+//      register all measures
 moscaServer.server.on('published', function (packet, client) {
-  console.log("Someone is doing something..",packet,packet.payload.toString());
+  let topic = packet.payload.topic;
+  if (topic.indexOf("/new/subscribes") == -1 || topic.indexOf("/new/clients") == -1){
+    Measure.create({
+      topic: packet.topic,
+      device : packet.topic.split('/')[1],
+      name : packet.topic.split('/')[2],
+      value: packet.payload.toString(),
+      timestamp: new Date().getTime()
+    }).then(
+      item =>{
+        console.log(" I created the item");
+      })
+      .catch(err => {
+        console.log("Error",err);
+      });
+  }
 });

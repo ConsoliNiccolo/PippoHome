@@ -4,8 +4,8 @@ var utils = require('../utils/writer.js');
 var Group = require('../service/GroupService');
 
 module.exports.createGroup = function createGroup (req, res, next) {
-  var name = req.swagger.params['name'].value;
-  Group.createGroup(name)
+  //var name = req.swagger.params['name'].value;
+  Group.createGroup(req.body['name'])
     .then(function (response) {
       utils.writeJson(res, response);
     })

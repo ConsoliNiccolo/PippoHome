@@ -1,4 +1,7 @@
 'use strict';
+var Groupschema = require('../mongo/mongo-schemas/GroupSchema');
+var mongoose = require('mongoose');
+var Group = mongoose.model("Group", Groupschema.Group);
 
 
 /**
@@ -9,7 +12,14 @@
  **/
 exports.createGroup = function(name) {
   return new Promise(function(resolve, reject) {
-    resolve();
+    let id = Math.floor(Math.random()*1000) +1;
+    Group.create({
+      name : name,
+      id : id,
+    }).then( item => {
+      console.log("Created Group",name,id);
+      resolve(item);
+    }).catch(err => reject({Error:err}));
   });
 }
 
@@ -21,19 +31,8 @@ exports.createGroup = function(name) {
  **/
 exports.getGroups = function() {
   return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ {
-  "name" : "name",
-  "id" : 0.80082819046101150206595775671303272247314453125
-}, {
-  "name" : "name",
-  "id" : 0.80082819046101150206595775671303272247314453125
-} ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
+    Group.find({}).then( items => { resolve(items);})
+    .catch(err => {reject({Error:err});});
+});
 }
 

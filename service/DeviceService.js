@@ -4,6 +4,8 @@ var mongoose = require('mongoose');
 var Device = mongoose.model("Device", deviceSchema.Device);
 
 
+/* A standard device raspberry on fresh registration */
+
 let standardConfiguration = {
   connectedInterfaces: [{
     name: "Sensor001",
@@ -49,21 +51,19 @@ exports.registerDevice = function (device) {
       name: device.name
     }).then(item => {
       if (item.length == 0) {
-        getNumberedId().then(item => {
-          Device.create({
-            name: device['name'],
-            id: item,
-            group: 0,
-            configuration: standardConfiguration,
-          }).then(item => {
-            console.log("I created the given item", device);
-            resolve(item);
-          }).catch(err => {
-            reject(err);
-          });
+        Device.create({
+          name: device['name'],
+          id: Math.floor(Math.random() * 1000) + 1,
+          group: device['group'],
+          configuration: standardConfiguration,
+        }).then(el => {
+          console.log("I created the given item", el);
+          resolve(el);
+        }).catch(err => {
+          reject(err);
         });
       } else {
-        reject({ err: "It already exists" });
+        reject({ Error: "The Device already exists" });
       }
     }).catch(err => { console.log("Error"); reject(err); })
   });
@@ -95,9 +95,9 @@ function getNumberedId() {
  **/
 exports.updateDevice = function (body) {
   return new Promise(function (resolve, reject) {
-    Device.findOneAndUpdate(body['name'],body, {new: true}).then( (item) => {
+    Device.findOneAndUpdate(body['name'], body, { new: true }).then((item) => {
       resolve(item);
-    }).catch( err => reject({Error: err}));
+    }).catch(err => reject({ Error: err }));
   });
 }
 

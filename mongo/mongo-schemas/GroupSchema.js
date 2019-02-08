@@ -1,8 +1,7 @@
 var mongoose = require("mongoose");
 
-var groupSchema = mongoose.Schema({
+var Group = mongoose.Schema({
     name : String,
-    id : String
+    id : Number
 });
-
-module.exports=mongoose.model("Group",groupSchema);
+module.exports=mongoose.model("Group",Group);
