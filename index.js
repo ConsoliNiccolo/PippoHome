@@ -48,7 +48,7 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
   http.createServer(app).listen(serverPort, function () {
     console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
     console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
-    console.log('Mosca is currently running on ',moscaServer.server.url)
+    console.log('Mosca is currently running on ', moscaServer.server.url)
   });
 
 });
@@ -57,7 +57,7 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
 // ######################################################
 //                 Mongo Settings
 // ######################################################
-mongoose.Promise=global.Promise;
+mongoose.Promise = global.Promise;
 mongoose.connect("mongodb://localhost:27017/PippoHomeOfficial");
 
 // # Load Schemas from ./MongoSchemas
@@ -77,20 +77,21 @@ mongoose.connect("mongodb://localhost:27017/PippoHomeOfficial");
 //  Comunication with IoT Devices
 //      register all measures
 moscaServer.server.on('published', function (packet, client) {
-  let topic = packet.payload.topic;
-  if (topic.indexOf("/new/subscribes") == -1 || topic.indexOf("/new/clients") == -1){
+  console.log(packet);
+  let topic = packet.topic;
+  if (topic.indexOf("/new/subscribes") == -1 || topic.indexOf("/new/clients") == -1) {
     Measure.create({
       topic: packet.topic,
-      device : packet.topic.split('/')[1],
-      name : packet.topic.split('/')[2],
+      deviceId: packet.topic.split('/')[1],
+      name: packet.topic.split('/')[2],
       value: packet.payload.toString(),
       timestamp: new Date().getTime()
     }).then(
-      item =>{
+      item => {
         console.log(" I created the item");
       })
       .catch(err => {
-        console.log("Error",err);
+        console.log("Error", err);
       });
   }
 });

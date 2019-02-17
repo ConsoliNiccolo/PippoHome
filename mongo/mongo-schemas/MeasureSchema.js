@@ -3,7 +3,7 @@ var mongoose = require("mongoose");
 var Measure = mongoose.Schema({
     topic: String,
     value: String,
-    device: String,
+    deviceId: String,
     name: String,
     timestamp: String
 });

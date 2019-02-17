@@ -22,6 +22,7 @@ var Device = new Schema({
     id : Number,
     name : String,
     group : Number,
+    ipAndPort : String,
     configuration : [Configuration]
 });
 

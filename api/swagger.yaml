@@ -43,6 +43,27 @@ paths:
         200:
           description: "successfully created group"
       x-swagger-router-controller: "Group"
+  /measures/{deviceId}:
+    get:
+      tags:
+      - "Measure"
+      description: "returns all fresh measures"
+      produces:
+      - application/json
+      operationId: "getMeasures"
+      parameters:
+      - name: "deviceId"
+        in: "path"
+        required: true
+        type: "number"
+      responses:
+        200:
+          description: "All fresh measures"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Measure"
+      x-swagger-router-controller: "Measure"
   /devices:
     get:
       tags:
@@ -97,7 +118,7 @@ paths:
         405:
           description: "Validation exception"
       x-swagger-router-controller: "Device"
-  /command/{deviceId}/{value}:
+  /command/{deviceId}/{sensorName}/{value}:
     get:
       tags:
       - "Command"
@@ -105,6 +126,10 @@ paths:
       operationId: "getComnmands"
       parameters:
       - name: "deviceId"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "sensorName"
         in: "path"
         required: true
         type: "string"
@@ -130,6 +155,17 @@ definitions:
     example:
       name: "name"
       id: 0.80082819046101150206595775671303272247314453125
+  Measure:
+    type: "object"
+    properties:
+      sensorName:
+        type: "string"
+      sensorValue:
+        type: "number"
+    description: "a measure"
+    example:
+      sensorName: "Sensor001"
+      sensorValue: 25.5
   Device:
     type: "object"
     properties:
@@ -179,6 +215,14 @@ definitions:
     example:
       name: "name"
       group: "group"
+  GetMeasureInfo:
+    type: "object"
+    properties:
+      sensorId:
+        type: "number"
+    description: "get measures from one device"
+    example:
+      sensorId: "194"
   GroupCreationInfo:
     type: "object"
     properties:
