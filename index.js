@@ -63,7 +63,7 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
 //                 Mongo Settings
 // ######################################################
 mongoose.Promise = global.Promise;
-mongoose.connect("mongodb://localhost:27017/PippoHomeOfficial");
+mongoose.connect("mongodb+srv://Niccos:Reitalia88@cluster0-9rqfj.mongodb.net/PippoHomeOfficial?retryWrites=true");
 
 // # Load Schemas from ./MongoSchemas
 
