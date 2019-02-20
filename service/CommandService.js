@@ -29,7 +29,7 @@ exports.getComnmands = function (deviceId, sensorName, value) {
                 ProcessingNodeREDRequest(items.ipAndPort, sensorName,
                   pin.name).then(el => {
                     let message = {
-                      topic: '/' + deviceId+ '/' +sensorName,
+                      topic: '/sub/' + deviceId + '/' + sensorName,
                       payload: value, // or a Buffer
                       qos: 1, // 0, 1, or 2
                       retain: false // or true
@@ -63,7 +63,7 @@ exports.getComnmands = function (deviceId, sensorName, value) {
 
 function ProcessingNodeREDRequest(NodeRedAddress, sensorName, pinNumber) {
   return new Promise(function (resolve, reject) {
-    http.get('http://' + NodeRedAddress + '/flows', (resp) => {
+    http.get('http://' + NodeRedAddress + ":1880" + '/flows', (resp) => {
       let data = '';
       let flow_id = "";
       let modifiedElements = [];
@@ -99,7 +99,7 @@ function ProcessingNodeREDRequest(NodeRedAddress, sensorName, pinNumber) {
 function getFlowConfig(NodeRedAddress, flow_id, sensorName, elementModified) {
   return new Promise(function (resolve, reject) {
     console.log("Flowid:", flow_id);
-    http.get('http://' + NodeRedAddress + '/flow/' + flow_id, (resp) => {
+    http.get('http://' + NodeRedAddress + ":1880" + '/flow/' + flow_id, (resp) => {
       let data = '';
       let newdata = '';
       // A chunk of data has been recieved.
@@ -114,7 +114,7 @@ function getFlowConfig(NodeRedAddress, flow_id, sensorName, elementModified) {
             flowdata.nodes = flowdata.nodes.filter(el => el != obj);
           }
         });
-        modifiedElements.forEach( modifiedSensor => {flowdata.nodes.push(modifiedSensor);});
+        modifiedElements.forEach(modifiedSensor => { flowdata.nodes.push(modifiedSensor); });
         console.log("NewData:", flowdata);
         POSTaNewFlow(NodeRedAddress, flowdata, flow_id).then(res => resolve(res)).catch(err => reject({ Error: err }));
       });
@@ -129,7 +129,7 @@ function getFlowConfig(NodeRedAddress, flow_id, sensorName, elementModified) {
 function POSTaNewFlow(NodeRedAddress, newflow, id) {
   return new Promise(function (resolve, reject) {
     console.log("Here", newflow);
-    axios.put('http://' + NodeRedAddress + '/flow/' + id, {
+    axios.put('http://' + NodeRedAddress + ":1880" + '/flow/' + id, {
       id: newflow.id,
       label: newflow.label,
       nodes: newflow.nodes

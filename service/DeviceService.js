@@ -55,7 +55,7 @@ exports.registerDevice = function (device) {
           name: device['name'],
           id: Math.floor(Math.random()*Math.PI* 1000) + 1,
           group: device['group'],
-          ipAndPort: '192.168.1.67:1880',
+          ipAndPort: '192.168.1.67',
           configuration: standardConfiguration,
         }).then(el => {
           console.log("I created the given item", el);

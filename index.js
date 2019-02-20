@@ -10,13 +10,17 @@ var swaggerTools = require('swagger-tools');
 var jsyaml = require('js-yaml');
 var moscaServer = require('./mosca-broker/broker');
 var serverPort = 8080;
-
+var regex = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/;
 
 var measureSchema = require('./mongo/mongo-schemas/MeasureSchema');
+var clientSchema = require('./mongo/mongo-schemas/ClientSchema');
+var deviceSchema = require('./mongo/mongo-schemas/DeviceSchema');
+var subSchema = require('./mongo/mongo-schemas/SubSchema');
+
 var Measure = mongoose.model("Measure", measureSchema.Measure);
-
-
-
+var Client = mongoose.model("Client", clientSchema.Client);
+var Device = mongoose.model("Device", deviceSchema.Device);
+var Subscription = mongoose.model("Subscription", subSchema.Subscription);
 
 // swaggerRouter configuration
 var options = {
@@ -54,6 +58,7 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
 });
 
 
+
 // ######################################################
 //                 Mongo Settings
 // ######################################################
@@ -76,9 +81,32 @@ mongoose.connect("mongodb://localhost:27017/PippoHomeOfficial");
 
 //  Comunication with IoT Devices
 //      register all measures
+moscaServer.server.on('clientConnected', function (client) {
+  let address = client.connection.stream.remoteAddress.match(regex);
+  Client.findOne({
+    id: client.id
+  }).then(foundCl => {
+    if (foundCl == null) {
+      Client.create({
+        id: client.id,
+        address: address[0]
+      }).then(client => {
+        console.log("Client created", client.id);
+      }).catch(err => console.log(err));
+    } else { console.log("Client exists", client.id); }
+  }).catch(err => console.log(err));
+});
+
 moscaServer.server.on('published', function (packet, client) {
-  console.log(packet);
   let topic = packet.topic;
+  if (topic.indexOf('/new/subscribes') > -1) {
+    let item =JSON.parse(packet.payload);
+    Subscription.create({
+      sensorId : parseInt(item.topic.split('/')[2]),
+      mqttId : item.clientId,
+      sensorName : item.topic.split('/')[3]
+    }).then( el => console.log("Subscription created")).catch(err => console.log(err));
+  }
   if (topic.indexOf("/new/subscribes") == -1 || topic.indexOf("/new/clients") == -1) {
     Measure.create({
       topic: packet.topic,
@@ -88,10 +116,23 @@ moscaServer.server.on('published', function (packet, client) {
       timestamp: new Date().getTime()
     }).then(
       item => {
-        console.log(" I created the item");
+        console.log("Measure created ");
       })
       .catch(err => {
         console.log("Error", err);
       });
   }
 });
+
+
+const routineSubs = setInterval( function () {
+  Client.find().then( clients => clients.forEach( client => {
+    Subscription.findOne({ mqttId : client.id}).then( sub => {
+      Device.findOne({ id: +sub.sensorId }).then ( device => {
+        device.ipAndPort = client.address;
+        console.log("Update Address to:" +device.ipAndPort);
+      }).catch(err => console.log(err));
+    }).catch(err => console.log(err));;
+  })).catch(err => console.log(err));;
+},30000);
+routineSubs;
