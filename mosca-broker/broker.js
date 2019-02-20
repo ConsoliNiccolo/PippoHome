@@ -6,7 +6,7 @@ var mosca = require('mosca');
 var ascoltatore = {
     //using ascoltatore
     type: 'mongo',
-    url: 'mongodb://localhost:27017/mqtt',
+    url: 'mongodb+srv://Niccos:Reitalia88@cluster0-9rqfj.mongodb.net/ascoltatori?retryWrites=true',
     pubsubCollection: 'ascoltatori',
     mongo: {}
   };
