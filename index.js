@@ -35,7 +35,8 @@ var options = {
 // The Swagger document (require it, build it programmatically, fetch it from a URL, ...)
 var spec = fs.readFileSync(path.join(__dirname, 'api/swagger.yaml'), 'utf8');
 var swaggerDoc = jsyaml.safeLoad(spec);
-var io = require('socket.io');
+// var io = require('socket.io');
+// var sockets;
 
 // var ascoltatore = {
 //     //using ascoltatore
@@ -77,14 +78,14 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
   });
   mqttServer.attachHttpServer(httpServ);
   mqttServer.on('ready', setup); 
-  io.listen(httpServ);
-
+  // io.listen(httpServ);
+  // sockets = io.sockets
 });
 
-io.sockets.on('connection', function (socket) {
-  var address = socket.handshake.address;
-  console.log('New connection from ' + address.address + ':' + address.port);
-});
+// io.sockets.on('connection', function (socket) {
+//   var address = socket.handshake.address;
+//   console.log('New connection from ' + address.address + ':' + address.port);
+// });
 // ######################################################
 //                 Mongo Settings
 // ######################################################
@@ -113,6 +114,7 @@ mongoose.connect("mongodb+srv://Niccos:Reitalia88@cluster0-9rqfj.mongodb.net/Pip
 //  Comunication with IoT Devices
 //      register all measures
 mqttServer.on('clientConnected', function (client) {
+  console.log(client.req);
   //console.log(client);
   // let ipAddress;
   // let forwardedIpsStr = client.header('x-forwarded-for');
