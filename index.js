@@ -54,7 +54,7 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
   let httpServ = http.createServer(app).listen(process.env.PORT || 8080, function () {
     console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
     console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
-    console.log('Mosca is currently running on ', moscaServer.server.url)
+    console.log('Mosca is currently running on ', mqttServer.url)
   });
   mqttServer.attachHttpServer(httpServ);
   mqttServer.on('ready', setup); 
@@ -88,7 +88,7 @@ mongoose.connect("mongodb+srv://Niccos:Reitalia88@cluster0-9rqfj.mongodb.net/Pip
 
 //  Comunication with IoT Devices
 //      register all measures
-httpServ.on('clientConnected', function (client) {
+mqttServer.on('clientConnected', function (client) {
   let address = client.connection.stream.remoteAddress.match(regex);
   Client.findOne({
     id: client.id
@@ -104,7 +104,7 @@ httpServ.on('clientConnected', function (client) {
   }).catch(err => console.log(err));
 });
 
-httpServ.on('published', function (packet, client) {
+mqttServer.on('published', function (packet, client) {
   let topic = packet.topic;
   if (topic.indexOf('/new/subscribes') > -1) {
     let item =JSON.parse(packet.payload);
