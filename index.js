@@ -116,7 +116,6 @@ function setup() {
 //      register all measures
 mqttServer.on('clientConnected', function (client) {
 
-  console.log(ipAddress);
   Client.findOne({
     id: client.id
   }).then(foundCl => {
