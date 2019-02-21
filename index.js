@@ -1,5 +1,6 @@
 'use strict';
 
+
 var fs = require('fs'),
   path = require('path'),
   http = require('http'),
@@ -78,7 +79,11 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
   mqttServer.on('ready', setup); 
 });
 
-
+var io = require('socket.io').listen(mqttServer);
+io.sockets.on('connection', function (socket) {
+  var address = socket.handshake.address;
+  console.log('New connection from ' + address.address + ':' + address.port);
+});
 // ######################################################
 //                 Mongo Settings
 // ######################################################
@@ -108,7 +113,7 @@ mongoose.connect("mongodb+srv://Niccos:Reitalia88@cluster0-9rqfj.mongodb.net/Pip
 //      register all measures
 mqttServer.on('clientConnected', function (client) {
   let ipAddress;
-  let forwardedIpsStr = client.header('x-forwarded-for');
+  let forwardedIpsStr = req.header('x-forwarded-for');
   if (forwardedIpsStr) {
     // 'x-forwarded-for' header may return multiple IP addresses in
     // the format: "client IP, proxy 1 IP, proxy 2 IP" so take the
