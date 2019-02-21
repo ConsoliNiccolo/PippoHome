@@ -89,8 +89,9 @@ mongoose.connect("mongodb+srv://Niccos:Reitalia88@cluster0-9rqfj.mongodb.net/Pip
 //  Comunication with IoT Devices
 //      register all measures
 mqttServer.on('clientConnected', function (client) {
-  console.log(client.connection.stream.remoteAddress.toString());
-  let address = client.connection.stream.remoteAddress.toString().match(regex);
+  console.log(client.connection);
+  console.log(client.connection.stream.remoteAddress);
+  let address = client.connection.stream.remoteAddress.match(regex);
   Client.findOne({
     id: client.id
   }).then(foundCl => {
