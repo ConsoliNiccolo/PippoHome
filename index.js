@@ -79,7 +79,7 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
   mqttServer.on('ready', setup); 
 });
 
-var io = require('socket.io').listen(mqttServer);
+var io = require('socket.io').listen(httpServ);
 io.sockets.on('connection', function (socket) {
   var address = socket.handshake.address;
   console.log('New connection from ' + address.address + ':' + address.port);
