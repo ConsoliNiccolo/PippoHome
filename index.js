@@ -35,6 +35,24 @@ var options = {
 var spec = fs.readFileSync(path.join(__dirname, 'api/swagger.yaml'), 'utf8');
 var swaggerDoc = jsyaml.safeLoad(spec);
 
+
+// var ascoltatore = {
+//     //using ascoltatore
+//     type: 'mongo',
+//     url: 'mongodb://localhost:27017/mqtt',
+//     pubsubCollection: 'ascoltatori',
+//     mongo: {}
+//   };
+  
+//   var settings = {
+//     port: 1883,
+//     backend: ascoltatore
+//   };
+
+  // var mqttServer = new mosca.Server(settings);
+  // mqttServer.on('ready', setup); 
+
+
 // Initialize the Swagger middleware
 swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
 
@@ -54,7 +72,7 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
   let httpServ = http.createServer(app).listen(process.env.PORT || 8080, function () {
     console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
     console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
-    console.log('Mosca is currently running on ', mqttServer.url)
+    console.log('Mosca is currently running on ')
   });
   mqttServer.attachHttpServer(httpServ);
   mqttServer.on('ready', setup); 
@@ -89,9 +107,12 @@ mongoose.connect("mongodb+srv://Niccos:Reitalia88@cluster0-9rqfj.mongodb.net/Pip
 //  Comunication with IoT Devices
 //      register all measures
 mqttServer.on('clientConnected', function (client) {
+  console.log("COnnection");
   console.log(client.connection);
-  console.log(client.connection.stream.remoteAddress);
+  console.log("Now client");
+  console.log(client);
   let address = client.connection.stream.remoteAddress.match(regex);
+  console.log(address[0]);
   Client.findOne({
     id: client.id
   }).then(foundCl => {
