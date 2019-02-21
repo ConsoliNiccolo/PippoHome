@@ -12,7 +12,7 @@ var swaggerTools = require('swagger-tools');
 var jsyaml = require('js-yaml');
 var moscaServer = require('./mosca-broker/broker');
 var serverPort = 8080;
-var regex = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/;
+var regex = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g;
 
 var measureSchema = require('./mongo/mongo-schemas/MeasureSchema');
 var clientSchema = require('./mongo/mongo-schemas/ClientSchema');
@@ -89,7 +89,8 @@ mongoose.connect("mongodb+srv://Niccos:Reitalia88@cluster0-9rqfj.mongodb.net/Pip
 //  Comunication with IoT Devices
 //      register all measures
 mqttServer.on('clientConnected', function (client) {
-  let address = client.connection.stream.remoteAddress.match(regex);
+  console.log(client.connection.stream.remoteAddress.toString());
+  let address = client.connection.stream.remoteAddress.toString().match(regex);
   Client.findOne({
     id: client.id
   }).then(foundCl => {
