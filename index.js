@@ -114,24 +114,23 @@ mongoose.connect("mongodb+srv://Niccos:Reitalia88@cluster0-9rqfj.mongodb.net/Pip
 //  Comunication with IoT Devices
 //      register all measures
 mqttServer.on('clientConnected', function (client) {
-  console.log(client.req);
-  //console.log(client);
-  // let ipAddress;
-  // let forwardedIpsStr = client.header('x-forwarded-for');
-  // if (forwardedIpsStr) {
-  //   // 'x-forwarded-for' header may return multiple IP addresses in
-  //   // the format: "client IP, proxy 1 IP, proxy 2 IP" so take the
-  //   // the first one
-  //   var forwardedIps = forwardedIpsStr.split(',');
-  //   ipAddress = forwardedIps[0];
-  // }
-  // if (!ipAddress) {
-  //   // Ensure getting client IP address still works in
-  //   // development environment
-  //   ipAddress = req.connection.remoteAddress;
-  // }
-  // console.log(ipAddress);
-  // console.log(client.id);
+  
+  var ipAddress;
+  // Amazon EC2 / Heroku workaround to get real client IP
+  var forwardedIpsStr = client.headers['x-forwarded-for']
+  if (forwardedIpsStr && forwardedIpsStr !== undefined){
+    // 'x-forwarded-for' header may return multiple IP addresses in
+    // the format: "client IP, proxy 1 IP, proxy 2 IP" so take the
+    // the first one
+    var forwardedIps = forwardedIpsStr.split(',');
+    ipAddress = forwardedIps[0];
+  }
+  if (!ipAddress) {
+    // Ensure getting client IP address still works in
+    // development environment
+    ipAddress = req.connection.remoteAddress;
+  }
+  console.log(ipAddress);
   Client.findOne({
     id: client.id
   }).then(foundCl => {
