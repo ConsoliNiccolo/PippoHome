@@ -112,7 +112,7 @@ mongoose.connect("mongodb+srv://Niccos:Reitalia88@cluster0-9rqfj.mongodb.net/Pip
 //  Comunication with IoT Devices
 //      register all measures
 mqttServer.on('clientConnected', function (client) {
-  console.log(client);
+  //console.log(client);
   // let ipAddress;
   // let forwardedIpsStr = client.header('x-forwarded-for');
   // if (forwardedIpsStr) {
