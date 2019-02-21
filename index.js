@@ -35,7 +35,7 @@ var options = {
 // The Swagger document (require it, build it programmatically, fetch it from a URL, ...)
 var spec = fs.readFileSync(path.join(__dirname, 'api/swagger.yaml'), 'utf8');
 var swaggerDoc = jsyaml.safeLoad(spec);
-var io = require('socket.io');
+
 // var sockets;
 
 // var ascoltatore = {
@@ -78,12 +78,12 @@ let httpServ = http.createServer(initializeMiddleWare).listen(process.env.PORT |
   console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
   console.log('Mosca is currently running on ')
 });
+var io = require('socket.io')(httpServ);
 mqttServer.attachHttpServer(httpServ);
 mqttServer.on('ready', setup);
-io.listen(httpServ);
 
 
-io.sockets.on('connection', function (socket) {
+io.on('connection', function (socket) {
   var address = socket.handshake.address;
   console.log('New connection from ' + address.address + ':' + address.port);
 });
@@ -163,10 +163,12 @@ const routineSubs = setInterval(function () {
   Client.find().then(clients => clients.forEach(client => {
     Subscription.findOne({ mqttId: client.id }).then(sub => {
       console.log(sub);
-      Device.findOne({ id: sub.sensorId }).then(device => {
-        device.ipAndPort = client.address;
-        console.log("Update Address to:" + device.ipAndPort);
-      }).catch(err => console.log(err));
+      if (sub != null) {
+        Device.findOne({ id: sub.sensorId }).then(device => {
+          device.ipAndPort = client.address;
+          console.log("Update Address to:" + device.ipAndPort);
+        }).catch(err => console.log(err));
+      }
     }).catch(err => console.log(err));;
   })).catch(err => console.log(err));;
 }, 30000);
