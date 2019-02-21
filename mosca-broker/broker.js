@@ -3,19 +3,18 @@
 // ######################################################
 var mosca = require('mosca');
 
-var ascoltatore = {
-    //using ascoltatore
-    type: 'mongo',
-    size: 100000,
-    url: 'mongodb+srv://Niccos2:Reitalia882@cluster0-9rqfj.mongodb.net/mqtt?retryWrites=true',
-    pubsubCollection: 'ascoltatori',
-    mongo: {}
-  };
+// var ascoltatore = {
+//     //using ascoltatore
+//     type: 'mongo',
+//     url: 'mongodb+srv://Niccos2:Reitalia882@cluster0-9rqfj.mongodb.net/mqtt?retryWrites=true',
+//     pubsubCollection: 'ascoltatori',
+//     mongo: {}
+//   };
   
-  var settings = {
-    port: 1883,
-    backend: ascoltatore
-  };
+//   var settings = {
+//     port: 1883,
+//     backend: ascoltatore
+//   };
 // ######################################################
 //                 Not required for db
 // ######################################################
@@ -31,7 +30,7 @@ var ascoltatore = {
 //                Mosca Server Power up
 // ######################################################
  
-  var server = new mosca.Server(settings);
+  var server = new mosca.Server();
   server.on('ready', setup); 
 
   // fired when the mqtt server is ready
