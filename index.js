@@ -35,7 +35,7 @@ var options = {
 // The Swagger document (require it, build it programmatically, fetch it from a URL, ...)
 var spec = fs.readFileSync(path.join(__dirname, 'api/swagger.yaml'), 'utf8');
 var swaggerDoc = jsyaml.safeLoad(spec);
-// var io = require('socket.io');
+var io = require('socket.io');
 // var sockets;
 
 // var ascoltatore = {
@@ -45,19 +45,18 @@ var swaggerDoc = jsyaml.safeLoad(spec);
 //     pubsubCollection: 'ascoltatori',
 //     mongo: {}
 //   };
-  
+
 //   var settings = {
 //     port: 1883,
 //     backend: ascoltatore
 //   };
 
-  // var mqttServer = new mosca.Server(settings);
-  // mqttServer.on('ready', setup); 
+// var mqttServer = new mosca.Server(settings);
+// mqttServer.on('ready', setup); 
 
 
 // Initialize the Swagger middleware
-swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
-
+let initializeMiddleWare = swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
   // Interpret Swagger resources and attach metadata to request - must be first in swagger-tools middleware chain
   app.use(middleware.swaggerMetadata());
 
@@ -70,22 +69,24 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
   // Serve the Swagger documents and Swagger UI
   app.use(middleware.swaggerUi());
 
-  // Start the server
-  let httpServ = http.createServer(app).listen(process.env.PORT || 8080, function () {
-    console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
-    console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
-    console.log('Mosca is currently running on ')
-  });
-  mqttServer.attachHttpServer(httpServ);
-  mqttServer.on('ready', setup); 
-  // io.listen(httpServ);
-  // sockets = io.sockets
+  return app;
 });
 
-// io.sockets.on('connection', function (socket) {
-//   var address = socket.handshake.address;
-//   console.log('New connection from ' + address.address + ':' + address.port);
-// });
+// Start the server
+let httpServ = http.createServer(initializeMiddleWare).listen(process.env.PORT || 8080, function () {
+  console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
+  console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
+  console.log('Mosca is currently running on ')
+});
+mqttServer.attachHttpServer(httpServ);
+mqttServer.on('ready', setup);
+io.listen(httpServ);
+
+
+io.sockets.on('connection', function (socket) {
+  var address = socket.handshake.address;
+  console.log('New connection from ' + address.address + ':' + address.port);
+});
 // ######################################################
 //                 Mongo Settings
 // ######################################################
@@ -106,30 +107,15 @@ mongoose.connect("mongodb+srv://Niccos:Reitalia88@cluster0-9rqfj.mongodb.net/Pip
 // ######################################################
 
 
-  // fired when the mqtt server is ready
-  function setup() {
-    console.log('Mosca server is up and running');
-  }
+// fired when the mqtt server is ready
+function setup() {
+  console.log('Mosca server is up and running');
+}
 
 //  Comunication with IoT Devices
 //      register all measures
 mqttServer.on('clientConnected', function (client) {
-  
-  var ipAddress;
-  // Amazon EC2 / Heroku workaround to get real client IP
-  var forwardedIpsStr = client.headers['x-forwarded-for']
-  if (forwardedIpsStr && forwardedIpsStr !== undefined){
-    // 'x-forwarded-for' header may return multiple IP addresses in
-    // the format: "client IP, proxy 1 IP, proxy 2 IP" so take the
-    // the first one
-    var forwardedIps = forwardedIpsStr.split(',');
-    ipAddress = forwardedIps[0];
-  }
-  if (!ipAddress) {
-    // Ensure getting client IP address still works in
-    // development environment
-    ipAddress = req.connection.remoteAddress;
-  }
+
   console.log(ipAddress);
   Client.findOne({
     id: client.id
@@ -148,12 +134,12 @@ mqttServer.on('clientConnected', function (client) {
 mqttServer.on('published', function (packet, client) {
   let topic = packet.topic;
   if (topic.indexOf('/new/subscribes') > -1) {
-    let item =JSON.parse(packet.payload);
+    let item = JSON.parse(packet.payload);
     Subscription.create({
-      sensorId : parseInt(item.topic.split('/')[2]),
-      mqttId : item.clientId,
-      sensorName : item.topic.split('/')[3]
-    }).then( el => console.log("Subscription created")).catch(err => console.log(err));
+      sensorId: parseInt(item.topic.split('/')[2]),
+      mqttId: item.clientId,
+      sensorName: item.topic.split('/')[3]
+    }).then(el => console.log("Subscription created")).catch(err => console.log(err));
   }
   if (topic.indexOf("/new/subscribes") == -1 || topic.indexOf("/new/clients") == -1) {
     Measure.create({
@@ -173,17 +159,17 @@ mqttServer.on('published', function (packet, client) {
 });
 
 
-const routineSubs = setInterval( function () {
-  Client.find().then( clients => clients.forEach( client => {
-    Subscription.findOne({ mqttId : client.id}).then( sub => {
+const routineSubs = setInterval(function () {
+  Client.find().then(clients => clients.forEach(client => {
+    Subscription.findOne({ mqttId: client.id }).then(sub => {
       console.log(sub);
-      Device.findOne({ id: sub.sensorId }).then ( device => {
+      Device.findOne({ id: sub.sensorId }).then(device => {
         device.ipAndPort = client.address;
-        console.log("Update Address to:" +device.ipAndPort);
+        console.log("Update Address to:" + device.ipAndPort);
       }).catch(err => console.log(err));
     }).catch(err => console.log(err));;
   })).catch(err => console.log(err));;
-},30000);
+}, 30000);
 routineSubs;
 
 
