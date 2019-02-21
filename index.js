@@ -107,19 +107,29 @@ mongoose.connect("mongodb+srv://Niccos:Reitalia88@cluster0-9rqfj.mongodb.net/Pip
 //  Comunication with IoT Devices
 //      register all measures
 mqttServer.on('clientConnected', function (client) {
-  console.log("COnnection");
-  console.log(client.connection);
-  console.log("Now client");
-  console.log(client);
-  let address = client.connection.stream.remoteAddress.match(regex);
-  console.log(address[0]);
+  let ipAddress;
+  let forwardedIpsStr = client.header('x-forwarded-for');
+  if (forwardedIpsStr) {
+    // 'x-forwarded-for' header may return multiple IP addresses in
+    // the format: "client IP, proxy 1 IP, proxy 2 IP" so take the
+    // the first one
+    var forwardedIps = forwardedIpsStr.split(',');
+    ipAddress = forwardedIps[0];
+  }
+  if (!ipAddress) {
+    // Ensure getting client IP address still works in
+    // development environment
+    ipAddress = req.connection.remoteAddress;
+  }
+  console.log(ipAddress);
+  console.log(client.id);
   Client.findOne({
     id: client.id
   }).then(foundCl => {
     if (foundCl == null) {
       Client.create({
         id: client.id,
-        address: address[0]
+        address: ipAddress
       }).then(client => {
         console.log("Client created", client.id);
       }).catch(err => console.log(err));
