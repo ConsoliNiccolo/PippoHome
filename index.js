@@ -113,7 +113,7 @@ mongoose.connect("mongodb+srv://Niccos:Reitalia88@cluster0-9rqfj.mongodb.net/Pip
 //      register all measures
 mqttServer.on('clientConnected', function (client) {
   let ipAddress;
-  let forwardedIpsStr = req.header('x-forwarded-for');
+  let forwardedIpsStr = client.header('x-forwarded-for');
   if (forwardedIpsStr) {
     // 'x-forwarded-for' header may return multiple IP addresses in
     // the format: "client IP, proxy 1 IP, proxy 2 IP" so take the
