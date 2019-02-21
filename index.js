@@ -3,7 +3,9 @@
 var fs = require('fs'),
   path = require('path'),
   http = require('http'),
-  mongoose = require("mongoose");
+  mongoose = require("mongoose"),
+  mosca = require('mosca'),
+  mqttServer = new mosca.Server({});
 
 var app = require('connect')();
 var swaggerTools = require('swagger-tools');
@@ -49,14 +51,14 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
   app.use(middleware.swaggerUi());
 
   // Start the server
-  http.createServer(app).listen(serverPort, function () {
+  let httpServ = http.createServer(app).listen(process.env.PORT || 8080, function () {
     console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
     console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
     console.log('Mosca is currently running on ', moscaServer.server.url)
   });
-
+  mqttServer.attachHttpServer(httpServ);
+  mqttServer.on('ready', setup); 
 });
-
 
 
 // ######################################################
@@ -79,9 +81,14 @@ mongoose.connect("mongodb+srv://Niccos:Reitalia88@cluster0-9rqfj.mongodb.net/Pip
 // ######################################################
 
 
+  // fired when the mqtt server is ready
+  function setup() {
+    console.log('Mosca server is up and running');
+  }
+
 //  Comunication with IoT Devices
 //      register all measures
-moscaServer.server.on('clientConnected', function (client) {
+httpServ.on('clientConnected', function (client) {
   let address = client.connection.stream.remoteAddress.match(regex);
   Client.findOne({
     id: client.id
@@ -97,7 +104,7 @@ moscaServer.server.on('clientConnected', function (client) {
   }).catch(err => console.log(err));
 });
 
-moscaServer.server.on('published', function (packet, client) {
+httpServ.on('published', function (packet, client) {
   let topic = packet.topic;
   if (topic.indexOf('/new/subscribes') > -1) {
     let item =JSON.parse(packet.payload);
@@ -136,3 +143,8 @@ const routineSubs = setInterval( function () {
   })).catch(err => console.log(err));;
 },30000);
 routineSubs;
+
+
+module.exports = {
+  mqttServer: mqttServer
+}

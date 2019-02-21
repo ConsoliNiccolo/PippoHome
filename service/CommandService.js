@@ -4,7 +4,7 @@ var mongoose = require('mongoose');
 var Command = mongoose.model("Command", commandSchema.Command);
 var deviceSChema = require('../mongo/mongo-schemas/DeviceSchema');
 var Device = mongoose.model("Device", deviceSChema.Device);
-var moscaServer = require('../mosca-broker/broker');
+var mqtt = require('../index');
 var http = require('http');
 var axios = require('axios');
 
@@ -35,14 +35,14 @@ exports.getComnmands = function (deviceId, sensorName, value) {
                       retain: false // or true
                     };
                     if (el.status == "200") { // Flow is correct just push message
-                      moscaServer.server.publish(message, function () {
+                      mqtt.mqttServer.publish(message, function () {
                         // Logic.
                         resolve(message);
                       });
                     }
                     else if (el.status == "500") { // POST the new flow
                       getFlowConfig(items.ipAndPort, el.id, sensorName, el.flow).then(res => {
-                        moscaServer.server.publish(message, function () {
+                        mqtt.mqttServer.publish(message, function () {
                           // Logic.
                           resolve(message);
                         });
