@@ -174,7 +174,8 @@ mqttServer.on('published', function (packet, client) {
 const routineSubs = setInterval( function () {
   Client.find().then( clients => clients.forEach( client => {
     Subscription.findOne({ mqttId : client.id}).then( sub => {
-      Device.findOne({ id: +sub.sensorId }).then ( device => {
+      console.log(sub);
+      Device.findOne({ id: sub.sensorId }).then ( device => {
         device.ipAndPort = client.address;
         console.log("Update Address to:" +device.ipAndPort);
       }).catch(err => console.log(err));
